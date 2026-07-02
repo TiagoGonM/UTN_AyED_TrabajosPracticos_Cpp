@@ -333,6 +333,5 @@ void printFn8() {
     pasajeSegundosACadena(45106.97, cadena);
     cout << "45106.97" << " => " << cadena << endl;
     
-    nextFn();
     cout << "------------------------------------" << endl;
 }
