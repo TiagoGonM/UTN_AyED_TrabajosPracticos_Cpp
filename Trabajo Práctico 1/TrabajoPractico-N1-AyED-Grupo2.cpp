@@ -210,7 +210,7 @@ void pasajeSegundosACadena(float segundos, char destino[]) {
 }
 
 void nextFn() {
-    cout << "\nPresione cualquier tecla para seguir...\n";
+    cout << "\nPresione la tecla 'Enter' para seguir...\n";
     cin.get();
 }
 
@@ -253,9 +253,9 @@ void printFn2() {
     if (resultado == 0) {
         cout << "Resultado esperado: 0 - Cadenas iguales" << endl; // Las cadenas son iguales
     } else if (resultado < 0) {
-        cout << "Resultado esperado: valor negativo." << endl; // La primera cadena es menor
+        cout << "Resultado: " << resultado << ", cadena 1 es menor" << endl; // La primera cadena es menor
     } else {
-        cout << "Resultado esperado: positivo." << endl; // La primera cadena es mayor
+        cout << "Resultado: " << resultado << ", cadena 1 es mayor";// La primera cadena es mayor
     }
     
     nextFn();
