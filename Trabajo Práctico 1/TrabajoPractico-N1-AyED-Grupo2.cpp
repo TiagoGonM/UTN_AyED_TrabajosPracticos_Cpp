@@ -251,11 +251,11 @@ void printFn2() {
     int resultado = compararCadenas(cadena1, cadena2);
     
     if (resultado == 0) {
-        cout << "0 - Cadenas iguales" << endl; // Las cadenas son iguales
+        cout << "Resultado esperado: 0 - Cadenas iguales" << endl; // Las cadenas son iguales
     } else if (resultado < 0) {
-        cout << "Es menor" << endl; // La primera cadena es menor
+        cout << "Resultado esperado: valor negativo." << endl; // La primera cadena es menor
     } else {
-        cout << "Es mayor" << endl; // La primera cadena es mayor
+        cout << "Resultado esperado: positivo." << endl; // La primera cadena es mayor
     }
     
     nextFn();
