@@ -44,20 +44,83 @@ void leerCorredores(RegCorredores corredores[], FILE* file) {
     };
 }
 
-void mostrarInforme(RegCorredores* corredores) {
+void mostrarInforme(RegCorredores v[], int n) {
+    cout << "N  Nombre                    Total" << endl;
+    for (int i = 0; i < n; i++) {
+        char nombre[TAMAÑO_CAMPO] = "";
+        establecerTamaño(nombre, TAMAÑO_CAMPO, v[i].nombreApellido);
+
+        char t[15];
+        if (tiempoADecimas(v[i].llegada) == -1)
+            strcpy(t, "No Termino");
+        else
+            strcpy(t, v[i].llegada);
+
+        cout << v[i].numero << " " << nombre << " " << t << endl;
+    }
 }
+
+// Convierte "HH:MM:SS.D" a decimas. Si es DNF devuelve -1.
+int tiempoADecimas(char llegada[]) {
+    if (llegada[0] == 'D') return -1;
+    int h = (llegada[0]-'0')*10 + (llegada[1]-'0');
+    int m = (llegada[3]-'0')*10 + (llegada[4]-'0');
+    int s = (llegada[6]-'0')*10 + (llegada[7]-'0');
+    int d = (llegada[9]-'0');
+    return ((h*3600 + m*60 + s)*10 + d);
+}
+
+// Ordena por tiempo, los -1 van al final
+void ordenar(RegCorredores v[], int n) {
+    for (int i = 0; i < n-1; i++)
+        for (int j = 0; j < n-1-i; j++) {
+            int t1 = tiempoADecimas(v[j].llegada);
+            int t2 = tiempoADecimas(v[j+1].llegada);
+            if (t1 == -1) t1 = 99999999;
+            if (t2 == -1) t2 = 99999999;
+            if (t1 > t2) {
+                RegCorredores aux = v[j];
+                v[j] = v[j+1];
+                v[j+1] = aux;
+            }
+        }
+}
+
 
 int main() {
     RegCorredores corredores[CANTIDAD_CORREDORES] = {};
     RegCorredores reg;
 
-    char path[100] = ""; 
-    strcat(path, NOMBRE_ARCHIVO); // "<ruta>/<archivo>"
-    
-    FILE* fCorredores = fopen(NOMBRE_ARCHIVO, "rb");
+    char carpetaRuta[80] = "";
+    char nombreDelArchivo[80] = "";
+    char ruta[100] = "";
+    cout << "Carpeta: ";
+    cin >> carpetaRuta;
+    cout << "Nombre informe: ";
+    cin >> nombreDelArchivo;
+    cout << "Path bin: ";
+    cin >> ruta;
+
+    FILE* fCorredores = fopen(ruta, "rb");
     leerCorredores(corredores, fCorredores);
     fclose(fCorredores);
 
+    RegCorredores clasica[1000], nonstop[1000];
+    int nC = 0, nN = 0;
+    for (int i = 0; i < CANTIDAD_CORREDORES; i++) {
+        if (corredores[i].numero == 0) break;
+        if (strstr(corredores[i].categoria, "Clasica") != NULL)
+            clasica[nC++] = corredores[i];
+        else
+            nonstop[nN++] = corredores[i];
+    }
+    ordenar(clasica, nC);
+    ordenar(nonstop, nN);
+
+    cout << "CLASICA:" << endl;
+    mostrarInforme(clasica, nC);
+    cout << "NONSTOP:" << endl;
+    mostrarInforme(nonstop, nN);    
     // Ejemplo de uso
     // char str[TAMAÑO_CAMPO] = "";
     // establecerTamaño(str, TAMAÑO_CAMPO, reg.nombreApellido);
