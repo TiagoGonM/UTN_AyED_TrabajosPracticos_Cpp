@@ -3,7 +3,9 @@
 
 #define CANTIDAD_CORREDORES 1000
 #define TAMAÑO_CAMPO 40
-#define NOMBRE_ARCHIVO "Archivo corredores 4Refugios.bin"
+#define NOMBRE_ARCHIVO_CORREDORES_DEFAULT "Archivo corredores 4Refugios"
+#define NOMBRE_INFORME_CLASICA_DEFAULT "Informe Carrera Clásica"
+#define NOMBRE_INFORME_NONSTOP_DEFAULT "Informe Carrera NonStop"
 
 using namespace std;
 
@@ -70,7 +72,6 @@ void mostrarInforme(RegCorredores v[], int n) {
     }
 }
 
-
 // Convierte decimas a "HH:MM:SS.D" . Si es -1 devuelve "DNF".
 void pasajeDecimasACadena(int decimasTotal, char destino[]) {
     
@@ -120,22 +121,47 @@ void ordenar(RegCorredores v[], int n) {
         }
 }
 
+void setIfEmpty(char dest[], char src[]) {
+    if (strlen(dest) > 0) return;
+    strcpy(dest, src);
+}
+
+void loadData(char ruta[], int rutaSize, char rutaInformeClasica[], int clasicaSize, char rutaInformeNonStop[], int nonStopSize) {
+    cout << "Ingrese ruta y nombre del archivo .bin de corredores [sin extensión] (Predeterminado: <carpeta raíz>/" << NOMBRE_ARCHIVO_CORREDORES_DEFAULT << "): ";
+    cin.getline(ruta, rutaSize);
+    setIfEmpty(ruta, NOMBRE_ARCHIVO_CORREDORES_DEFAULT);
+    strcat(ruta, ".bin");
+    
+    cout << "Ruta resultante: " << ruta << endl << endl;
+
+    cout << "Ingrese ruta donde se generará y nombre del informe de la Carrera 'Clásica' [sin extensión] (Predeterminado: <carpeta raíz>/" << NOMBRE_INFORME_CLASICA_DEFAULT << "): ";
+    cin.getline(rutaInformeClasica, clasicaSize);
+    setIfEmpty(rutaInformeClasica, NOMBRE_INFORME_CLASICA_DEFAULT);
+    strcat(rutaInformeClasica, ".txt");
+
+    cout << "Ruta resultante: " << rutaInformeClasica << endl << endl;
+    
+    cout << "Ingrese ruta donde se generará y nombre del informe de la Carrera 'NonStop' [sin extensión] (Predeterminado: <carpeta raíz>/" << NOMBRE_INFORME_NONSTOP_DEFAULT << "): ";
+    cin.getline(rutaInformeNonStop, nonStopSize);
+    setIfEmpty(rutaInformeNonStop, NOMBRE_INFORME_NONSTOP_DEFAULT);
+    strcat(rutaInformeNonStop, ".txt");
+
+    cout << "Ruta resultante: " << rutaInformeNonStop << endl << endl;
+}
 
 int main() {
     RegCorredores corredores[CANTIDAD_CORREDORES] = {};
     RegCorredores reg;
+    
+    char rutaArchivoCorredores[300] = "";
+    char rutaArchivoInformeClasica[80] = "";
+    char rutaArchivoInformeNonStop[80] = "";
 
-    char carpetaRuta[80] = "";
-    char nombreDelArchivo[80] = "";
-    char ruta[100] = "";
-    cout << "Carpeta: ";
-    cin >> carpetaRuta;
-    cout << "Nombre informe: ";
-    cin >> nombreDelArchivo;
-    cout << "Path bin: ";
-    cin >> ruta;
+    loadData(rutaArchivoCorredores, 300, rutaArchivoInformeClasica, 80, rutaArchivoInformeNonStop, 80);
 
-    FILE* fCorredores = fopen(ruta, "rb");
+    cin.get();
+
+    FILE* fCorredores = fopen(rutaArchivoCorredores, "rb");
     leerCorredores(corredores, fCorredores);
     fclose(fCorredores);
 
