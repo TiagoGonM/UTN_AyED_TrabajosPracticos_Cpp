@@ -44,6 +44,16 @@ void leerCorredores(RegCorredores corredores[], FILE* file) {
     };
 }
 
+// Convierte "HH:MM:SS.D" a decimas. Si es DNF devuelve -1.
+int tiempoADecimas(char llegada[]) {
+    if (llegada[0] == 'D') return -1;
+    int h = (llegada[0]-'0')*10 + (llegada[1]-'0');
+    int m = (llegada[3]-'0')*10 + (llegada[4]-'0');
+    int s = (llegada[6]-'0')*10 + (llegada[7]-'0');
+    int d = (llegada[9]-'0');
+    return ((h*3600 + m*60 + s)*10 + d);
+}
+
 void mostrarInforme(RegCorredores v[], int n) {
     cout << "N  Nombre                    Total" << endl;
     for (int i = 0; i < n; i++) {
@@ -60,15 +70,6 @@ void mostrarInforme(RegCorredores v[], int n) {
     }
 }
 
-// Convierte "HH:MM:SS.D" a decimas. Si es DNF devuelve -1.
-int tiempoADecimas(char llegada[]) {
-    if (llegada[0] == 'D') return -1;
-    int h = (llegada[0]-'0')*10 + (llegada[1]-'0');
-    int m = (llegada[3]-'0')*10 + (llegada[4]-'0');
-    int s = (llegada[6]-'0')*10 + (llegada[7]-'0');
-    int d = (llegada[9]-'0');
-    return ((h*3600 + m*60 + s)*10 + d);
-}
 
 // Convierte decimas a "HH:MM:SS.D" . Si es -1 devuelve "DNF".
 void pasajeDecimasACadena(int decimasTotal, char destino[]) {
