@@ -70,6 +70,39 @@ int tiempoADecimas(char llegada[]) {
     return ((h*3600 + m*60 + s)*10 + d);
 }
 
+// Convierte decimas a "HH:MM:SS.D" . Si es -1 devuelve "DNF".
+void pasajeDecimasACadena(int decimasTotal, char destino[]) {
+    
+    if (decimasTotal == -1) {
+        strcpy(destino, "DNF");
+        return;
+    }
+
+    int horas = decimasTotal / 36000;
+    decimasTotal = decimasTotal - horas * 36000;
+
+    int minutos = decimasTotal / 600;
+    decimasTotal = decimasTotal - minutos * 600;
+
+    int segundos = decimasTotal / 10;
+    int decimas = decimasTotal % 10;
+
+    destino[0] = horas / 10 + '0';
+    destino[1] = horas % 10 + '0';
+    destino[2] = ':';
+
+    destino[3] = minutos / 10 + '0';
+    destino[4] = minutos % 10 + '0';
+    destino[5] = ':';
+
+    destino[6] = segundos / 10 + '0';
+    destino[7] = segundos % 10 + '0';
+    destino[8] = '.';
+
+    destino[9] = decimas + '0';
+    destino[10] = '\0';
+}
+
 // Ordena por tiempo, los -1 van al final
 void ordenar(RegCorredores v[], int n) {
     for (int i = 0; i < n-1; i++)
