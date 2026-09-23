@@ -2,7 +2,7 @@
 #include <cstring>
 
 #define CANTIDAD_CORREDORES 1000
-#define TAMAÑO_CAMPO 40
+#define LARGO_CAMPO 40
 #define NOMBRE_ARCHIVO_CORREDORES_DEFAULT "Archivo corredores 4Refugios"
 #define NOMBRE_INFORME_CLASICA_DEFAULT "Informe Carrera Clásica"
 #define NOMBRE_INFORME_NONSTOP_DEFAULT "Informe Carrera NonStop"
@@ -28,7 +28,7 @@ struct RegInforme {
     int tiempoTotal; // debe figurar como "Total"
 };
 
-void establecerTamaño(char dest[], int destBuf, const char src[]) {
+void establecerLargoCampo(char dest[], int destBuf, const char src[]) {
     strcpy(dest, src);
     
     for (int i = strlen(src); i < destBuf; i++) {
@@ -59,8 +59,8 @@ int tiempoADecimas(char llegada[]) {
 void mostrarInforme(RegCorredores v[], int n) {
     cout << "N  Nombre                    Total" << endl;
     for (int i = 0; i < n; i++) {
-        char nombre[TAMAÑO_CAMPO] = "";
-        establecerTamaño(nombre, TAMAÑO_CAMPO, v[i].nombreApellido);
+        char nombre[LARGO_CAMPO] = "";
+        establecerLargoCampo(nombre, LARGO_CAMPO, v[i].nombreApellido);
 
         char t[15];
         if (tiempoADecimas(v[i].llegada) == -1)
@@ -107,18 +107,21 @@ void pasajeDecimasACadena(int decimasTotal, char destino[]) {
 
 // Ordena por tiempo, los -1 van al final
 void ordenar(RegCorredores v[], int n) {
-    for (int i = 0; i < n-1; i++)
+    for (int i = 0; i < n-1; i++) {
         for (int j = 0; j < n-1-i; j++) {
             int t1 = tiempoADecimas(v[j].llegada);
             int t2 = tiempoADecimas(v[j+1].llegada);
+            
             if (t1 == -1) t1 = 99999999;
             if (t2 == -1) t2 = 99999999;
+            
             if (t1 > t2) {
                 RegCorredores aux = v[j];
                 v[j] = v[j+1];
                 v[j+1] = aux;
             }
         }
+    }
 }
 
 void setIfEmpty(char dest[], char src[]) {
@@ -151,38 +154,35 @@ void loadData(char ruta[], int rutaSize, char rutaInformeClasica[], int clasicaS
 
 int main() {
     RegCorredores corredores[CANTIDAD_CORREDORES] = {};
+    RegCorredores clasica[CANTIDAD_CORREDORES], nonstop[CANTIDAD_CORREDORES];
     RegCorredores reg;
-    
+
     char rutaArchivoCorredores[300] = "";
     char rutaArchivoInformeClasica[80] = "";
     char rutaArchivoInformeNonStop[80] = "";
 
     loadData(rutaArchivoCorredores, 300, rutaArchivoInformeClasica, 80, rutaArchivoInformeNonStop, 80);
 
-    cin.get();
-
     FILE* fCorredores = fopen(rutaArchivoCorredores, "rb");
     leerCorredores(corredores, fCorredores);
     fclose(fCorredores);
 
-    RegCorredores clasica[1000], nonstop[1000];
     int nC = 0, nN = 0;
     for (int i = 0; i < CANTIDAD_CORREDORES; i++) {
         if (corredores[i].numero == 0) break;
+
         if (strstr(corredores[i].categoria, "Clasica") != NULL)
             clasica[nC++] = corredores[i];
         else
             nonstop[nN++] = corredores[i];
     }
+
     ordenar(clasica, nC);
     ordenar(nonstop, nN);
 
     cout << "CLASICA:" << endl;
     mostrarInforme(clasica, nC);
+
     cout << "NONSTOP:" << endl;
-    mostrarInforme(nonstop, nN);    
-    // Ejemplo de uso
-    // char str[TAMAÑO_CAMPO] = "";
-    // establecerTamaño(str, TAMAÑO_CAMPO, reg.nombreApellido);
-    // cout << str << "separado" << endl;
+    mostrarInforme(nonstop, nN);
 }
