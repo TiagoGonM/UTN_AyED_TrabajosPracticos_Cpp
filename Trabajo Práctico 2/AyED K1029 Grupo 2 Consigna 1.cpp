@@ -2,7 +2,16 @@
 #include <cstring>
 
 #define CANTIDAD_CORREDORES 1000
-#define LARGO_CAMPO 40
+
+#define LARGO_CAMPO_POSICIONES 16
+#define LARGO_CAMPO_ID 6
+#define LARGO_CAMPO_GENERO 9
+#define LARGO_CAMPO_NOMBRE 40
+#define LARGO_CAMPO_CATEGORIA 70
+#define LARGO_CAMPO_LOCALIDAD 30
+#define LARGO_CAMPO_TIEMPOS 20
+
+
 #define NOMBRE_ARCHIVO_CORREDORES_DEFAULT "Archivo corredores 4Refugios"
 #define NOMBRE_INFORME_CLASICA_DEFAULT "Informe Carrera Clásica"
 #define NOMBRE_INFORME_NONSTOP_DEFAULT "Informe Carrera NonStop"
@@ -19,19 +28,61 @@ struct RegCorredores {
     char llegada[11]; // DNF, DNF (NL), DSP (FE) o el tiempo de llegada (formato HH:MM:SS.D)
 };
 
-struct RegInforme {
-    int corredorId; // debe figurar como "N°"
 
-    int posGral; // debe figurar como "Pos. Gral."
-    int posGenero; // debe figurar como "Pos. Género"
-    int posCat; // debe figurar como "Pos. Cat."
-    int tiempoTotal; // debe figurar como "Total"
+struct HeadersInforme {
+    char posGral[LARGO_CAMPO_POSICIONES] = "";
+    char posGenero[LARGO_CAMPO_POSICIONES + 1] = "";
+    char posCat[LARGO_CAMPO_POSICIONES] = "";
+    char corredorId[LARGO_CAMPO_ID + 1] = "";
+
+    char nombreApellido[LARGO_CAMPO_NOMBRE] = "";
+    char categoria[LARGO_CAMPO_CATEGORIA + 1] = "";
+    char genero[LARGO_CAMPO_GENERO + 1] = "";
+    char localidad[LARGO_CAMPO_LOCALIDAD] = "";
+    char total[LARGO_CAMPO_TIEMPOS] = "";
+    char difPrimero[LARGO_CAMPO_TIEMPOS] = "";
+    char difAnterior[LARGO_CAMPO_TIEMPOS] = "";
+};
+
+struct RegInforme {
+    char posGral[LARGO_CAMPO_POSICIONES] = ""; // debe figurar como "Pos. Gral."
+    char posGenero[LARGO_CAMPO_POSICIONES] = ""; // debe figurar como "Pos. Género"
+    char posCat[LARGO_CAMPO_POSICIONES] = ""; // debe figurar como "Pos. Cat."
+    
+    char corredorId[LARGO_CAMPO_ID] = ""; // debe figurar como "N°"
+
+    char nombreApellido[LARGO_CAMPO_NOMBRE] = "";
+    char categoria[LARGO_CAMPO_CATEGORIA] = "";
+    char genero[LARGO_CAMPO_GENERO] = "";
+    char localidad[LARGO_CAMPO_LOCALIDAD] = "";
+
+    char total[LARGO_CAMPO_TIEMPOS] = ""; // debe figurar como "Total"
+    char difPrimero[LARGO_CAMPO_TIEMPOS] = ""; // debe figurar como "Diferencia primero"
+    char difAnterior[LARGO_CAMPO_TIEMPOS] = ""; // debe figurar como "Diferencia anterior"
 };
 
 void establecerLargoCampo(char dest[], int destBuf, const char src[]) {
     strcpy(dest, src);
     
-    for (int i = strlen(src); i < destBuf; i++) {
+    for (int i = strlen(src); i < destBuf - 1; i++) {
+        dest[i] = ' ';
+    }
+    dest[destBuf - 1] = '\0';
+}
+
+void establecerLargoCampo(char dest[], int destBuf, const char src) {
+    dest[0] = src;
+
+    for (int i = 1; i < destBuf - 1; i++) {
+        dest[i] = ' ';
+    }
+    dest[destBuf - 1] = '\0';
+}
+
+void establecerLargoCampo(char dest[], int destBuf, int src) {
+    snprintf(dest, destBuf, "%d", src); // easy int to char[] conversion
+    
+    for (int i = strlen(dest); i < destBuf - 1; i++) {
         dest[i] = ' ';
     }
     dest[destBuf - 1] = '\0';
@@ -48,7 +99,7 @@ void leerCorredores(RegCorredores corredores[], FILE* file) {
 
 // Convierte "HH:MM:SS.D" a decimas. Si es DNF devuelve -1.
 int tiempoADecimas(char llegada[]) {
-    if (llegada[0] == 'D') return -1;
+    if (llegada[0] == 'D') return -1; // Contempla DNF y DSP + variantes
     int h = (llegada[0]-'0')*10 + (llegada[1]-'0');
     int m = (llegada[3]-'0')*10 + (llegada[4]-'0');
     int s = (llegada[6]-'0')*10 + (llegada[7]-'0');
@@ -56,19 +107,97 @@ int tiempoADecimas(char llegada[]) {
     return ((h*3600 + m*60 + s)*10 + d);
 }
 
-void mostrarInforme(RegCorredores v[], int n) {
-    cout << "N  Nombre                    Total" << endl;
-    for (int i = 0; i < n; i++) {
-        char nombre[LARGO_CAMPO] = "";
-        establecerLargoCampo(nombre, LARGO_CAMPO, v[i].nombreApellido);
+void establecerLargos(HeadersInforme& headers) {
+    establecerLargoCampo(headers.posGral, LARGO_CAMPO_POSICIONES, "Pos. Gral.");
+    establecerLargoCampo(headers.posGenero, LARGO_CAMPO_POSICIONES + 1, "Pos. Género."); // Tildes ocupan 2 bytes también
+    establecerLargoCampo(headers.posCat, LARGO_CAMPO_POSICIONES, "Pos. Cat.");
+    establecerLargoCampo(headers.corredorId, LARGO_CAMPO_ID + 1, "N°"); // "°" ocupa 2 bytes
+    establecerLargoCampo(headers.nombreApellido, LARGO_CAMPO_NOMBRE, "Nombre");
+    establecerLargoCampo(headers.categoria, LARGO_CAMPO_CATEGORIA + 1, "Categoría");
+    establecerLargoCampo(headers.genero, LARGO_CAMPO_GENERO + 1, "Género");
+    establecerLargoCampo(headers.total, LARGO_CAMPO_TIEMPOS, "Total");
+    establecerLargoCampo(headers.localidad, LARGO_CAMPO_LOCALIDAD, "Localidad");
+    establecerLargoCampo(headers.difPrimero, LARGO_CAMPO_TIEMPOS, "Diferencia primero");
+    establecerLargoCampo(headers.difAnterior, LARGO_CAMPO_TIEMPOS, "Diferencia anterior");
+}
 
-        char t[15];
-        if (tiempoADecimas(v[i].llegada) == -1)
-            strcpy(t, "No Termino");
-        else
-            strcpy(t, v[i].llegada);
+RegInforme generarRegistroInforme(
+    RegCorredores corredor, 
+    int posGral,
+    int posGenero,
+    int posCat,
+    const char total[], 
+    const char difPrimero[], 
+    const char difAnterior[]
+) {
+    RegInforme reg;
 
-        cout << v[i].numero << " " << nombre << " " << t << endl;
+    establecerLargoCampo(reg.posGral, LARGO_CAMPO_POSICIONES, posGral);
+    establecerLargoCampo(reg.posGenero, LARGO_CAMPO_POSICIONES, posGenero);
+    establecerLargoCampo(reg.posCat, LARGO_CAMPO_POSICIONES, posCat);
+
+    establecerLargoCampo(reg.corredorId, LARGO_CAMPO_ID, corredor.numero);
+    
+    establecerLargoCampo(reg.nombreApellido, LARGO_CAMPO_NOMBRE, corredor.nombreApellido);
+    establecerLargoCampo(reg.categoria, LARGO_CAMPO_CATEGORIA, corredor.categoria);
+    establecerLargoCampo(reg.genero, LARGO_CAMPO_GENERO, corredor.genero);
+    establecerLargoCampo(reg.localidad, LARGO_CAMPO_LOCALIDAD, corredor.localidad);
+
+    establecerLargoCampo(reg.total, LARGO_CAMPO_TIEMPOS, total);
+    establecerLargoCampo(reg.difPrimero, LARGO_CAMPO_TIEMPOS, difPrimero);
+    establecerLargoCampo(reg.difAnterior, LARGO_CAMPO_TIEMPOS, difAnterior);
+
+    return reg;
+}
+
+void generarInforme(FILE* file, RegCorredores v[], int n) {
+    HeadersInforme headers;
+
+    establecerLargos(headers);
+
+    // fwrite(id, sizeof(id - 1), 1, file);
+    // fwrite(nombreApellido, sizeof(nombreApellido - 1), 1, file);
+    // fwrite(total, sizeof(total - 1), 1, file);
+    cout << headers.posGral 
+         << headers.posGenero 
+         << headers.posCat
+         << headers.corredorId
+         << headers.nombreApellido 
+         << headers.categoria 
+         << headers.genero
+         << headers.localidad 
+         << headers.total 
+         << headers.difPrimero 
+         << headers.difAnterior
+         << endl;
+
+    for (int i = 0; i < 5; i++) {
+        RegInforme reg = generarRegistroInforme(
+            v[i],
+            -1,
+            -1,
+            -1,
+            tiempoADecimas(v[i].llegada) == -1 ? "No termino" : v[i].llegada,
+            "-1",
+            "-1"
+        );
+
+        cout << reg.posGral 
+             << reg.posGenero 
+             << reg.posCat
+             << reg.corredorId
+             << reg.nombreApellido 
+             << reg.categoria 
+             << reg.genero 
+             << reg.localidad 
+             << reg.total 
+             << reg.difPrimero 
+             << reg.difAnterior
+             << endl;
+
+        // fwrite(id, sizeof(id), 1, file);
+        // fwrite(nombre, sizeof(nombre), 1, file);
+        // fwrite(total, sizeof(total), 1, file);
     }
 }
 
@@ -76,7 +205,7 @@ void mostrarInforme(RegCorredores v[], int n) {
 void pasajeDecimasACadena(int decimasTotal, char destino[]) {
     
     if (decimasTotal == -1) {
-        strcpy(destino, "DNF");
+        strcpy(destino, "No termino");
         return;
     }
 
@@ -124,7 +253,7 @@ void ordenar(RegCorredores v[], int n) {
     }
 }
 
-void setIfEmpty(char dest[], char src[]) {
+void setIfEmpty(char dest[], const char src[]) {
     if (strlen(dest) > 0) return;
     strcpy(dest, src);
 }
@@ -140,14 +269,14 @@ void loadData(char ruta[], int rutaSize, char rutaInformeClasica[], int clasicaS
     cout << "Ingrese ruta donde se generará y nombre del informe de la Carrera 'Clásica' [sin extensión] (Predeterminado: <carpeta raíz>/" << NOMBRE_INFORME_CLASICA_DEFAULT << "): ";
     cin.getline(rutaInformeClasica, clasicaSize);
     setIfEmpty(rutaInformeClasica, NOMBRE_INFORME_CLASICA_DEFAULT);
-    strcat(rutaInformeClasica, ".txt");
+    strcat(rutaInformeClasica, ".bin");
 
     cout << "Ruta resultante: " << rutaInformeClasica << endl << endl;
     
     cout << "Ingrese ruta donde se generará y nombre del informe de la Carrera 'NonStop' [sin extensión] (Predeterminado: <carpeta raíz>/" << NOMBRE_INFORME_NONSTOP_DEFAULT << "): ";
     cin.getline(rutaInformeNonStop, nonStopSize);
     setIfEmpty(rutaInformeNonStop, NOMBRE_INFORME_NONSTOP_DEFAULT);
-    strcat(rutaInformeNonStop, ".txt");
+    strcat(rutaInformeNonStop, ".bin");
 
     cout << "Ruta resultante: " << rutaInformeNonStop << endl << endl;
 }
@@ -180,9 +309,11 @@ int main() {
     ordenar(clasica, nC);
     ordenar(nonstop, nN);
 
-    cout << "CLASICA:" << endl;
-    mostrarInforme(clasica, nC);
+    FILE* fListadoClasica = fopen(rutaArchivoInformeClasica, "wb");
+    generarInforme(fListadoClasica, clasica, nC);
+    fclose(fListadoClasica);
 
-    cout << "NONSTOP:" << endl;
-    mostrarInforme(nonstop, nN);
+    FILE* fListadoNonStop = fopen(rutaArchivoInformeNonStop, "wb");
+    generarInforme(fListadoNonStop, nonstop, nC);
+    fclose(fListadoNonStop);
 }
