@@ -5,10 +5,10 @@
 
 #define LARGO_CAMPO_POSICIONES 16
 #define LARGO_CAMPO_ID 6
-#define LARGO_CAMPO_GENERO 9
+#define LARGO_CAMPO_GENERO 10
 #define LARGO_CAMPO_NOMBRE 40
-#define LARGO_CAMPO_CATEGORIA 70
-#define LARGO_CAMPO_LOCALIDAD 30
+#define LARGO_CAMPO_CATEGORIA 50
+#define LARGO_CAMPO_LOCALIDAD 20
 #define LARGO_CAMPO_TIEMPOS 20
 
 
@@ -88,6 +88,87 @@ void establecerLargoCampo(char dest[], int destBuf, int src) {
     dest[destBuf - 1] = '\0';
 }
 
+void establecerLargoCampoCentrado(char dest[], int destBuf, const char src[]) {
+    int srcLen = strlen(src);
+    int availableSpace = destBuf - 1;
+
+    if (srcLen >= availableSpace) {
+        strcpy(dest, src);
+    }
+    
+    int spacesToInsert = availableSpace - srcLen;
+    int paddingLeft = spacesToInsert / 2;
+    int paddingRight = spacesToInsert - paddingLeft; // No siempre seran ambos lados simétricos
+
+    int idx = 0;
+    for (int i = 0; i < paddingLeft; i++) {
+        dest[idx++] = ' ';
+    }
+
+    
+    for (int i = 0; i < srcLen; i++) {
+        dest[idx++] = src[i];
+    }
+
+    for (int i = 0; i < paddingRight; i++) {
+        dest[idx++] = ' ';
+    }
+
+    dest[availableSpace] = '\0';
+}
+
+void establecerLargoCampoCentrado(char dest[], int destBuf, const char src) {
+    int availableSpace = destBuf - 1;
+    
+    int spacesToInsert = availableSpace - 1;
+    int paddingLeft = spacesToInsert / 2;
+    int paddingRight = spacesToInsert - paddingLeft; // No siempre seran ambos lados simétricos
+
+    int idx = 0;
+    for (int i = 0; i < paddingLeft; i++) {
+        dest[idx++] = ' ';
+    }
+
+    dest[idx++] = src;
+
+    for (int i = 0; i < paddingRight; i++) {
+        dest[idx++] = ' ';
+    }
+
+    dest[availableSpace] = '\0';
+}
+
+void establecerLargoCampoCentrado(char dest[], int destBuf, int src) {
+    char aux[6] = "";
+    snprintf(aux, destBuf, "%d", src);
+    int srcLen = strlen(aux);
+
+    int availableSpace = destBuf - 1;
+
+    if (srcLen >= availableSpace) {
+        strcpy(dest, aux);
+    }
+    
+    int spacesToInsert = availableSpace - srcLen;
+    int paddingLeft = spacesToInsert / 2;
+    int paddingRight = spacesToInsert - paddingLeft; // No siempre seran ambos lados simétricos
+
+    int idx = 0;
+    for (int i = 0; i < paddingLeft; i++) {
+        dest[idx++] = ' ';
+    }
+    
+    for (int i = 0; i < srcLen; i++) {
+        dest[idx++] = aux[i];
+    }
+
+    for (int i = 0; i < paddingRight; i++) {
+        dest[idx++] = ' ';
+    }
+
+    dest[availableSpace] = '\0';
+}
+
 void leerCorredores(RegCorredores corredores[], FILE* file) {
     RegCorredores reg;
     int i = 0;
@@ -108,17 +189,17 @@ int tiempoADecimas(char llegada[]) {
 }
 
 void establecerLargos(HeadersInforme& headers) {
-    establecerLargoCampo(headers.posGral, LARGO_CAMPO_POSICIONES, "Pos. Gral.");
-    establecerLargoCampo(headers.posGenero, LARGO_CAMPO_POSICIONES + 1, "Pos. Género."); // Tildes ocupan 2 bytes también
-    establecerLargoCampo(headers.posCat, LARGO_CAMPO_POSICIONES, "Pos. Cat.");
-    establecerLargoCampo(headers.corredorId, LARGO_CAMPO_ID + 1, "N°"); // "°" ocupa 2 bytes
-    establecerLargoCampo(headers.nombreApellido, LARGO_CAMPO_NOMBRE, "Nombre");
-    establecerLargoCampo(headers.categoria, LARGO_CAMPO_CATEGORIA + 1, "Categoría");
-    establecerLargoCampo(headers.genero, LARGO_CAMPO_GENERO + 1, "Género");
-    establecerLargoCampo(headers.total, LARGO_CAMPO_TIEMPOS, "Total");
-    establecerLargoCampo(headers.localidad, LARGO_CAMPO_LOCALIDAD, "Localidad");
-    establecerLargoCampo(headers.difPrimero, LARGO_CAMPO_TIEMPOS, "Diferencia primero");
-    establecerLargoCampo(headers.difAnterior, LARGO_CAMPO_TIEMPOS, "Diferencia anterior");
+    establecerLargoCampoCentrado(headers.posGral, LARGO_CAMPO_POSICIONES, "Pos. Gral.");
+    establecerLargoCampoCentrado(headers.posGenero, LARGO_CAMPO_POSICIONES + 1, "Pos. Género."); // Tildes ocupan 2 bytes también
+    establecerLargoCampoCentrado(headers.posCat, LARGO_CAMPO_POSICIONES, "Pos. Cat.");
+    establecerLargoCampoCentrado(headers.corredorId, LARGO_CAMPO_ID + 1, "N°"); // "°" ocupa 2 bytes
+    establecerLargoCampoCentrado(headers.nombreApellido, LARGO_CAMPO_NOMBRE, "Nombre");
+    establecerLargoCampoCentrado(headers.categoria, LARGO_CAMPO_CATEGORIA + 1, "Categoría");
+    establecerLargoCampoCentrado(headers.genero, LARGO_CAMPO_GENERO + 1, "Género");
+    establecerLargoCampoCentrado(headers.localidad, LARGO_CAMPO_LOCALIDAD, "Localidad");
+    establecerLargoCampoCentrado(headers.total, LARGO_CAMPO_TIEMPOS, "Total");
+    establecerLargoCampoCentrado(headers.difPrimero, LARGO_CAMPO_TIEMPOS, "Diferencia primero");
+    establecerLargoCampoCentrado(headers.difAnterior, LARGO_CAMPO_TIEMPOS, "Diferencia anterior");
 }
 
 RegInforme generarRegistroInforme(
@@ -132,20 +213,20 @@ RegInforme generarRegistroInforme(
 ) {
     RegInforme reg;
 
-    establecerLargoCampo(reg.posGral, LARGO_CAMPO_POSICIONES, posGral);
-    establecerLargoCampo(reg.posGenero, LARGO_CAMPO_POSICIONES, posGenero);
-    establecerLargoCampo(reg.posCat, LARGO_CAMPO_POSICIONES, posCat);
+    establecerLargoCampoCentrado(reg.posGral, LARGO_CAMPO_POSICIONES, posGral);
+    establecerLargoCampoCentrado(reg.posGenero, LARGO_CAMPO_POSICIONES, posGenero);
+    establecerLargoCampoCentrado(reg.posCat, LARGO_CAMPO_POSICIONES, posCat);
 
     establecerLargoCampo(reg.corredorId, LARGO_CAMPO_ID, corredor.numero);
     
     establecerLargoCampo(reg.nombreApellido, LARGO_CAMPO_NOMBRE, corredor.nombreApellido);
     establecerLargoCampo(reg.categoria, LARGO_CAMPO_CATEGORIA, corredor.categoria);
-    establecerLargoCampo(reg.genero, LARGO_CAMPO_GENERO, corredor.genero);
+    establecerLargoCampoCentrado(reg.genero, LARGO_CAMPO_GENERO, corredor.genero);
     establecerLargoCampo(reg.localidad, LARGO_CAMPO_LOCALIDAD, corredor.localidad);
 
-    establecerLargoCampo(reg.total, LARGO_CAMPO_TIEMPOS, total);
-    establecerLargoCampo(reg.difPrimero, LARGO_CAMPO_TIEMPOS, difPrimero);
-    establecerLargoCampo(reg.difAnterior, LARGO_CAMPO_TIEMPOS, difAnterior);
+    establecerLargoCampoCentrado(reg.total, LARGO_CAMPO_TIEMPOS, total);
+    establecerLargoCampoCentrado(reg.difPrimero, LARGO_CAMPO_TIEMPOS, difPrimero);
+    establecerLargoCampoCentrado(reg.difAnterior, LARGO_CAMPO_TIEMPOS, difAnterior);
 
     return reg;
 }
