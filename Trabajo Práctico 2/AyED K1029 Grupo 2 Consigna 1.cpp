@@ -252,7 +252,7 @@ void generarInforme(FILE* file, RegCorredores v[], int n) {
          << headers.difAnterior
          << endl;
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < n; i++) {
         RegInforme reg = generarRegistroInforme(
             v[i],
             -1,
@@ -390,7 +390,7 @@ int main() {
     ordenar(clasica, nC);
     ordenar(nonstop, nN);
 
-    FILE* fListadoClasica = fopen(rutaArchivoInformeClasica, "wb");
+    FILE* fListadoClasica = fopen(rutaArchivoInformeClasica, "wb"); // TODO: crear y cargar archivos binarios
     generarInforme(fListadoClasica, clasica, nC);
     fclose(fListadoClasica);
 
