@@ -240,41 +240,70 @@ void generarInforme(FILE* file, RegCorredores v[], int n) {
     // fwrite(nombreApellido, sizeof(nombreApellido - 1), 1, file);
     // fwrite(total, sizeof(total - 1), 1, file);
     cout << headers.posGral 
-         << headers.posGenero 
-         << headers.posCat
-         << headers.corredorId
-         << headers.nombreApellido 
-         << headers.categoria 
-         << headers.genero
-         << headers.localidad 
-         << headers.total 
-         << headers.difPrimero 
-         << headers.difAnterior
-         << endl;
+        << headers.posGenero 
+        << headers.posCat
+        << headers.corredorId
+        << headers.nombreApellido 
+        << headers.categoria 
+        << headers.genero
+        << headers.localidad 
+        << headers.total 
+        << headers.difPrimero 
+        << headers.difAnterior
+        << endl;
 
     for (int i = 0; i < n; i++) {
+        //todas las variables y las cadenas
+        int posGral = calcularPosGeneral(v, i); 
+        int posGenero = calcularPosGenero(v, i); 
+        int posCat = calcularPosCategoria(v, i);
+//estos 3 son calculados como int porque las funciones para calcular la posicion devuelven int pero en realidad en el struct son char y para poder mostrarlos como "-", conviene que sea char , fijense como mostrarlos de esa forma diría yo
+
+        int difPrimero = calcularDifPrimero(v, i); 
+        int difAnterior = calcularDifAnterior(v, i);
+        int tiempoTotal = tiempoADecimas(v[i].llegada);
+
+        char tiempoTotalChar[20] = "";
+        pasajeDecimasACadena(tiempoTotal, tiempoTotalChar);
+        char diferenciaPrimeroChar[20] = "";
+        char diferenciaAnteriorChar[20] = "";
+
+        //llenar las cadenas de las Diferencias 
+        if (difPrimero == -1) {
+            strcpy(diferenciaPrimeroChar, "-"); 
+            }
+        else { pasajeDecimasACadena(difPrimero, diferenciaPrimeroChar); 
+            } 
+        if (difAnterior == -1) {
+            strcpy(diferenciaAnteriorChar, "-");
+        } 
+        else { pasajeDecimasACadena(difAnterior, diferenciaAnteriorChar); 
+            } 
+            
+        // FALTA hacer CORRECTAMENTE posGral, posGenero, posCat, ya que al ser ints no se como hacer que muestre - sin cagar todo o complicarme mucho y estoy completamente quemado como para poner a pensar la solución ahora JAJAJAJAJ
+        
         RegInforme reg = generarRegistroInforme(
             v[i],
-            -1,
-            -1,
-            -1,
-            tiempoADecimas(v[i].llegada) == -1 ? "No termino" : v[i].llegada,
-            "-1",
-            "-1"
+            posGral, //esto puede que se cambie
+            posGenero, //esto puede que se cambie
+            posCat, //esto puede que se cambie
+            tiempoTotalChar,
+            diferenciaPrimeroChar,
+            diferenciaAnteriorChar
         );
 
         cout << reg.posGral 
-             << reg.posGenero 
-             << reg.posCat
-             << reg.corredorId
-             << reg.nombreApellido 
-             << reg.categoria 
-             << reg.genero 
-             << reg.localidad 
-             << reg.total 
-             << reg.difPrimero 
-             << reg.difAnterior
-             << endl;
+            << reg.posGenero 
+            << reg.posCat
+            << reg.corredorId
+            << reg.nombreApellido 
+            << reg.categoria 
+            << reg.genero 
+            << reg.localidad 
+            << reg.total 
+            << reg.difPrimero 
+            << reg.difAnterior
+            << endl;
 
         // fwrite(id, sizeof(id), 1, file);
         // fwrite(nombre, sizeof(nombre), 1, file);
@@ -282,7 +311,7 @@ void generarInforme(FILE* file, RegCorredores v[], int n) {
     }
 }
 
-// Convierte decimas a "HH:MM:SS.D" . Si es -1 devuelve "DNF".
+// Convierte decimas a "HH:MM:SS.D" . Si es -1 devuelve "NO TERMINO".
 void pasajeDecimasACadena(int decimasTotal, char destino[]) {
     
     if (decimasTotal == -1) {
@@ -332,6 +361,86 @@ void ordenar(RegCorredores v[], int n) {
             }
         }
     }
+}
+
+
+// Calcula la posición general
+int calcularPosGeneral(RegCorredores v[], int i) {
+    if (tiempoADecimas(v[i].llegada) == -1) {
+        return -1;
+    }
+    //la posicion que se muestra tiene que ser i+1 pq sino se muestra la posicion 0, además ya está ordenado el reg por tiempo de menor a mayor asi que no tiene que hacer nada 
+    return i+1;
+}
+
+
+// Calcula la posición por género.
+int calcularPosGenero(RegCorredores v[], int i) {
+    if (tiempoADecimas(v[i].llegada) == -1) {
+        return -1;
+    }
+
+    int pos = 1;
+
+    for (int j = 0; j < i; j++) {
+        //chequea cuantos del mismo genero hay con el contador pos
+        if (v[j].genero == v[i].genero) {
+            pos++;
+        }
+    }
+
+    return pos;
+}
+
+
+// Calcula la posición por categoría.
+int calcularPosCategoria(RegCorredores v[], int i) {
+    if (tiempoADecimas(v[i].llegada) == -1) {
+        return -1;
+    }
+    int pos = 1;
+    for (int j = 0; j < i; j++) {
+        //como la categoria esta en un array char usamos strcmp y si son iguales sumamos al contador
+        if (strcmp(v[j].categoria, v[i].categoria) == 0) {
+            pos++;
+        }
+    }
+    return pos;
+}
+
+
+// Calcula la diferencia entre él y el primero.
+int calcularDifPrimero(RegCorredores v[], int i) {
+    if (tiempoADecimas(v[i].llegada) == -1) {
+        return -1;
+    }
+  //esto está hecho así porque después a la hora de mostrar conviene mostrar todos los campos vacios como un - y conviene usar el -1 que ya usamos, hicimos lo mismo en la funcion para calcular al anterior
+    if (i == 0) {
+        return -1;
+    }
+
+    int tiempoCorredor = tiempoADecimas(v[i].llegada);
+    int tiempoPrimero = tiempoADecimas(v[0].llegada);
+
+    return tiempoCorredor - tiempoPrimero;
+}
+
+
+// Calcula la diferencia entre él y el anterior.
+int calcularDifAnterior(RegCorredores v[], int indice) {
+
+    // el primero no tiene anterior 
+    if (indice == 0) {
+        return -1;
+    }
+    if (tiempoADecimas(v[indice].llegada) == -1) {
+        return -1;
+    }
+
+    int tiempoCorredor = tiempoADecimas(v[indice].llegada);
+    int tiempoAnterior = tiempoADecimas(v[indice - 1].llegada);
+
+    return tiempoCorredor - tiempoAnterior;
 }
 
 void setIfEmpty(char dest[], const char src[]) {
@@ -395,6 +504,6 @@ int main() {
     fclose(fListadoClasica);
 
     FILE* fListadoNonStop = fopen(rutaArchivoInformeNonStop, "wb");
-    generarInforme(fListadoNonStop, nonstop, nC);
+    generarInforme(fListadoNonStop, nonstop, nN);
     fclose(fListadoNonStop);
 }
