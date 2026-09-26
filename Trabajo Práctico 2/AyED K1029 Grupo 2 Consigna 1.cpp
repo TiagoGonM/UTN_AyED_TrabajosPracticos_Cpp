@@ -61,6 +61,28 @@ struct RegInforme {
     char difAnterior[LARGO_CAMPO_TIEMPOS] = ""; // debe figurar como "Diferencia anterior"
 };
 
+// Declaraciones
+void establecerLargoCampo(char dest[], const char src[], int destBuf);
+void establecerLargoCampo(char dest[], char src, int destBuf);
+void establecerLargoCampo(char dest[], int src, int destBuf);
+void establecerLargoCampoCentrado(char dest[], const char src[], int destBuf);
+void establecerLargoCampoCentrado(char dest[], char src, int destBuf);
+void establecerLargoCampoCentrado(char dest[], int src, int destBuf);
+int tiempoADecimas(const char tiempo[]);
+void pasajeDecimasACadena(int decimas, char cadena[]);
+void ordenar(RegCorredores v[], int n);
+int calcularPosGeneral(RegCorredores v[], int indice);
+int calcularPosGenero(RegCorredores v[], int indice);
+int calcularPosCategoria(RegCorredores v[], int indice);
+int calcularDifPrimero(RegCorredores v[], int i);
+int calcularDifAnterior(RegCorredores v[], int indice);
+void setIfEmpty(char dest[], const char src[]);
+void loadData(char ruta[], int rutaSize, char rutaInformeClasica[], int clasicaSize, char rutaInformeNonStop[], int nonStopSize);
+void generarRegistroInforme(RegCorredores r, char posGral[], char posGenero[], char posCat[], char numero[], char total[], char difPrimero[], char difAnterior[]);
+void generarInforme(FILE* file, RegCorredores v[], int n);
+int leerCorredores(RegCorredores v[], FILE* f);
+
+
 void establecerLargoCampo(char dest[], int destBuf, const char src[]) {
     strcpy(dest, src);
     
@@ -315,7 +337,7 @@ void generarInforme(FILE* file, RegCorredores v[], int n) {
 void pasajeDecimasACadena(int decimasTotal, char destino[]) {
     
     if (decimasTotal == -1) {
-        strcpy(destino, "No termino");
+        strcpy(destino, "No Termino");
         return;
     }
 
