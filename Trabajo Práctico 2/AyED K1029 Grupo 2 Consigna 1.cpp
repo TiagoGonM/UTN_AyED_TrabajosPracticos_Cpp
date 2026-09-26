@@ -61,26 +61,27 @@ struct RegInforme {
 };
 
 // Declaraciones
-void establecerLargoCampo(char[], int, const char[]);
-void establecerLargoCampo(char[], int, const char[]);
-void establecerLargoCampo(char[], int, int);
-void establecerLargoCampoCentrado(char[], int, const char[]);
-void establecerLargoCampoCentrado(char[], int, const char[]);
-void establecerLargoCampoCentrado(char[], int, int);
-void establecerLargoHeaders(HeadersInforme&);
-int tiempoADecimas(const char[]);
-void pasajeDecimasACadena(int, char[]);
-void ordenar(RegCorredores[], int);
 int calcularPosGeneral(RegCorredores[], int);
 int calcularPosGenero(RegCorredores[], int);
 int calcularPosCategoria(RegCorredores[], int);
 int calcularDifPrimero(RegCorredores[], int);
 int calcularDifAnterior(RegCorredores[], int);
-void setIfEmpty(char[], const char[]);
-void loadData(char[], int, char[], int, char[], int);
-RegInforme generarRegistroInforme(RegCorredores, int, int, int, const char[], const char[], const char[]);
+void establecerLargoCampo(char[], int, const char[]);
+void establecerLargoCampo(char[], int, const char);
+void establecerLargoCampo(char[], int, int);
+void establecerLargoCampoCentrado(char[], int, const char[]);
+void establecerLargoCampoCentrado(char[], int, const char);
+void establecerLargoCampoCentrado(char[], int, int);
+void establecerLargoHeaders(HeadersInforme&);
 void generarInforme(FILE*, RegCorredores[], int);
+RegInforme generarRegistroInforme(RegCorredores, const char[], const char[], const char[], const char[], const char[], const char[]);
 void leerCorredores(RegCorredores[], FILE*);
+void loadData(char[], int, char[], int, char[], int);
+void ordenar(RegCorredores[], int);
+void pasajeDecimasACadena(int, char[]);
+void setIfEmpty(char[], const char[]);
+void sobreescribirLlegada(FILE*, RegCorredores&);
+int tiempoADecimas(const char[]);
 
 
 int main() {
@@ -94,7 +95,7 @@ int main() {
 
     loadData(rutaArchivoCorredores, 300, rutaArchivoInformeClasica, 80, rutaArchivoInformeNonStop, 80);
 
-    FILE* fCorredores = fopen(rutaArchivoCorredores, "rb");
+    FILE* fCorredores = fopen(rutaArchivoCorredores, "rb+"); // "rb+" nos permite escribir mientras leemos
     leerCorredores(corredores, fCorredores);
     fclose(fCorredores);
 
@@ -148,11 +149,21 @@ void loadData(char ruta[], int rutaSize, char rutaInformeClasica[], int clasicaS
     cout << "Ruta resultante: " << rutaInformeNonStop << endl << endl;
 }
 
+void sobreescribirLlegada(FILE* f, RegCorredores& reg) {
+    if (reg.llegada[0] == 'D') {
+        strcpy(reg.llegada, "No Termino");
+        fseek(f, -sizeof(RegCorredores), SEEK_CUR); // retrocedemos al registro anterior
+        fwrite(&reg, sizeof(RegCorredores), 1, f);
+        fflush(f); // fuerza la escritura antes de seguir leyendo
+    }
+}
+
 void leerCorredores(RegCorredores corredores[], FILE* file) {
     RegCorredores reg;
     int i = 0;
 
     while (fread(&reg, sizeof(RegCorredores), 1, file)) {
+        sobreescribirLlegada(file, reg);
         corredores[i++] = reg;
     };
 }
@@ -178,78 +189,91 @@ void ordenar(RegCorredores v[], int n) {
 
 void generarInforme(FILE* file, RegCorredores v[], int n) {
     HeadersInforme headers;
-
+    
     establecerLargoHeaders(headers);
-
+    
     // fwrite(id, sizeof(id - 1), 1, file);
     // fwrite(nombreApellido, sizeof(nombreApellido - 1), 1, file);
     // fwrite(total, sizeof(total - 1), 1, file);
+    
     cout << headers.posGral 
-        << headers.posGenero 
-        << headers.posCat
-        << headers.corredorId
-        << headers.nombreApellido 
-        << headers.categoria 
-        << headers.genero
-        << headers.localidad 
-        << headers.total 
-        << headers.difPrimero 
-        << headers.difAnterior
-        << endl;
-
+         << headers.posGenero 
+         << headers.posCat
+         << headers.corredorId
+         << headers.nombreApellido 
+         << headers.categoria 
+         << headers.genero
+         << headers.localidad 
+         << headers.total 
+         << headers.difPrimero 
+         << headers.difAnterior
+         << endl;
+    
     for (int i = 0; i < n; i++) {
         //todas las variables y las cadenas
-        int posGral = calcularPosGeneral(v, i); 
-        int posGenero = calcularPosGenero(v, i); 
+        int posGral = calcularPosGeneral(v, i);
+        int posGenero = calcularPosGenero(v, i);
         int posCat = calcularPosCategoria(v, i);
-//estos 3 son calculados como int porque las funciones para calcular la posicion devuelven int pero en realidad en el struct son char y para poder mostrarlos como "-", conviene que sea char , fijense como mostrarlos de esa forma diría yo
+        
+        char posGralChar[LARGO_CAMPO_POSICIONES] = "";
+        char posGeneroChar[LARGO_CAMPO_POSICIONES] = "";
+        char posCatChar[LARGO_CAMPO_POSICIONES] = "";
+        
+        // cast de posiciones a char[]
+        snprintf(posGralChar, LARGO_CAMPO_POSICIONES, "%d", posGral);
+        snprintf(posGeneroChar, LARGO_CAMPO_POSICIONES, "%d", posGenero);
+        snprintf(posCatChar, LARGO_CAMPO_POSICIONES, "%d", posCat);
+        
+        if (posGral == -1) strcpy(posGralChar, "-");
+        if (posGenero == -1) strcpy(posGeneroChar, "-");
+        if (posCat == -1) strcpy(posCatChar, "-");
 
-        int difPrimero = calcularDifPrimero(v, i); 
+        //estos 3 son calculados como int porque las funciones para calcular la posicion devuelven int pero en realidad en el struct son char y para poder mostrarlos como "-", conviene que sea char.
+        int difPrimero = calcularDifPrimero(v, i);
         int difAnterior = calcularDifAnterior(v, i);
         int tiempoTotal = tiempoADecimas(v[i].llegada);
-
+        
         char tiempoTotalChar[20] = "";
         pasajeDecimasACadena(tiempoTotal, tiempoTotalChar);
         char diferenciaPrimeroChar[20] = "";
         char diferenciaAnteriorChar[20] = "";
-
+        
         //llenar las cadenas de las Diferencias 
         if (difPrimero == -1) {
             strcpy(diferenciaPrimeroChar, "-"); 
-            }
+        }
         else { pasajeDecimasACadena(difPrimero, diferenciaPrimeroChar); 
-            } 
+        } 
         if (difAnterior == -1) {
             strcpy(diferenciaAnteriorChar, "-");
         } 
         else { pasajeDecimasACadena(difAnterior, diferenciaAnteriorChar); 
             } 
             
-        // FALTA hacer CORRECTAMENTE posGral, posGenero, posCat, ya que al ser ints no se como hacer que muestre - sin cagar todo o complicarme mucho y estoy completamente quemado como para poner a pensar la solución ahora JAJAJAJAJ
-        
         RegInforme reg = generarRegistroInforme(
             v[i],
-            posGral, //esto puede que se cambie
-            posGenero, //esto puede que se cambie
-            posCat, //esto puede que se cambie
+            posGralChar,
+            posGeneroChar,
+            posCatChar,
             tiempoTotalChar,
             diferenciaPrimeroChar,
             diferenciaAnteriorChar
         );
-
+        
+        
         cout << reg.posGral 
-            << reg.posGenero 
-            << reg.posCat
-            << reg.corredorId
-            << reg.nombreApellido 
-            << reg.categoria 
-            << reg.genero 
-            << reg.localidad 
-            << reg.total 
-            << reg.difPrimero 
-            << reg.difAnterior
-            << endl;
-
+             << reg.posGenero 
+             << reg.posCat
+             << reg.corredorId
+             << reg.nombreApellido 
+             << reg.categoria 
+             << reg.genero 
+             << reg.localidad 
+             << reg.total 
+             << reg.difPrimero 
+             << reg.difAnterior
+             << endl;
+            
         // fwrite(id, sizeof(id), 1, file);
         // fwrite(nombre, sizeof(nombre), 1, file);
         // fwrite(total, sizeof(total), 1, file);
@@ -258,9 +282,9 @@ void generarInforme(FILE* file, RegCorredores v[], int n) {
 
 RegInforme generarRegistroInforme(
     RegCorredores corredor, 
-    int posGral,
-    int posGenero,
-    int posCat,
+    const char posGral[],
+    const char posGenero[],
+    const char posCat[],
     const char total[], 
     const char difPrimero[], 
     const char difAnterior[]
@@ -407,9 +431,9 @@ void establecerLargoCampoCentrado(char dest[], int destBuf, int src) {
     dest[availableSpace] = '\0';
 }
 
-// Convierte "HH:MM:SS.D" a decimas. Si es DNF devuelve -1.
-int tiempoADecimas(char llegada[]) {
-    if (llegada[0] == 'D') return -1; // Contempla DNF y DSP + variantes
+// Convierte "HH:MM:SS.D" a decimas. Si es "No Termino" devuelve -1.
+int tiempoADecimas(const char llegada[]) {
+    if (llegada[0] == 'N') return -1;
     int h = (llegada[0]-'0')*10 + (llegada[1]-'0');
     int m = (llegada[3]-'0')*10 + (llegada[4]-'0');
     int s = (llegada[6]-'0')*10 + (llegada[7]-'0');
@@ -417,9 +441,7 @@ int tiempoADecimas(char llegada[]) {
     return ((h*3600 + m*60 + s)*10 + d);
 }
 
-// Convierte decimas a "HH:MM:SS.D" . Si es -1 devuelve "NO TERMINO".
 void pasajeDecimasACadena(int decimasTotal, char destino[]) {
-    
     if (decimasTotal == -1) {
         strcpy(destino, "No Termino");
         return;
