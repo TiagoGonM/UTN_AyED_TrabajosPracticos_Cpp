@@ -87,7 +87,6 @@ int tiempoADecimas(const char[]);
 int main() {
     RegCorredores corredores[CANTIDAD_CORREDORES_TOTAL] = {};
     RegCorredores clasica[CANTIDAD_CORREDORES_CARRERA], nonstop[CANTIDAD_CORREDORES_CARRERA];
-    RegCorredores reg;
 
     char carpetaRuta[200] = "./";
     char nombreDelArchivo[100] = "";
