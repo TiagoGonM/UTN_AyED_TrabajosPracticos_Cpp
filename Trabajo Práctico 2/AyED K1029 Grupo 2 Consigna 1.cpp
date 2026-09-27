@@ -89,13 +89,15 @@ int main() {
     RegCorredores clasica[CANTIDAD_CORREDORES], nonstop[CANTIDAD_CORREDORES];
     RegCorredores reg;
 
-    char rutaArchivoCorredores[300] = "";
-    char rutaArchivoInformeClasica[80] = "";
-    char rutaArchivoInformeNonStop[80] = "";
+    char carpetaRuta[200] = "./";
+    char nombreDelArchivo[100] = "";
+    char ruta[300] = "";
 
-    loadData(rutaArchivoCorredores, 300, rutaArchivoInformeClasica, 80, rutaArchivoInformeNonStop, 80);
-
-    FILE* fCorredores = fopen(rutaArchivoCorredores, "rb+"); // "rb+" nos permite escribir mientras leemos
+    // 1. Archivo corredores (lectura + escritura por el reemplazo)
+    strcpy(nombreDelArchivo, "Archivo corredores 4Refugios.bin");
+    strcpy(ruta, carpetaRuta);
+    strcat(ruta, nombreDelArchivo);
+    FILE* fCorredores = fopen(ruta, "rb+");
     leerCorredores(corredores, fCorredores);
     fclose(fCorredores);
 
@@ -112,41 +114,23 @@ int main() {
     ordenar(clasica, nC);
     ordenar(nonstop, nN);
     
-    FILE* fListadoClasica = fopen(rutaArchivoInformeClasica, "wb"); // TODO: crear y cargar archivos binarios
+    // 2. Informe Clásica
+    strcpy(nombreDelArchivo, "Informe Carrera Clásica.bin");
+    strcpy(ruta, carpetaRuta);
+    strcat(ruta, nombreDelArchivo);
+    FILE* fListadoClasica = fopen(ruta, "wb");
     generarInforme(fListadoClasica, clasica, nC);
     fclose(fListadoClasica);
     
-    FILE* fListadoNonStop = fopen(rutaArchivoInformeNonStop, "wb");
+    // 3. Informe NonStop
+    strcpy(nombreDelArchivo, "Informe Carrera NonStop.bin");
+    strcpy(ruta, carpetaRuta);
+    strcat(ruta, nombreDelArchivo);
+    FILE* fListadoNonStop = fopen(ruta, "wb");
     generarInforme(fListadoNonStop, nonstop, nN);
     fclose(fListadoNonStop);
-}
 
-void setIfEmpty(char dest[], const char src[]) {
-    if (strlen(dest) > 0) return;
-    strcpy(dest, src);
-}
-
-void loadData(char ruta[], int rutaSize, char rutaInformeClasica[], int clasicaSize, char rutaInformeNonStop[], int nonStopSize) {
-    cout << "Ingrese ruta y nombre del archivo .bin de corredores [sin extensión] (Predeterminado: <carpeta raíz>/" << NOMBRE_ARCHIVO_CORREDORES_DEFAULT << "): ";
-    cin.getline(ruta, rutaSize);
-    setIfEmpty(ruta, NOMBRE_ARCHIVO_CORREDORES_DEFAULT);
-    strcat(ruta, ".bin");
-    
-    cout << "Ruta resultante: " << ruta << endl << endl;
-
-    cout << "Ingrese ruta donde se generará y nombre del informe de la Carrera 'Clásica' [sin extensión] (Predeterminado: <carpeta raíz>/" << NOMBRE_INFORME_CLASICA_DEFAULT << "): ";
-    cin.getline(rutaInformeClasica, clasicaSize);
-    setIfEmpty(rutaInformeClasica, NOMBRE_INFORME_CLASICA_DEFAULT);
-    strcat(rutaInformeClasica, ".bin");
-
-    cout << "Ruta resultante: " << rutaInformeClasica << endl << endl;
-    
-    cout << "Ingrese ruta donde se generará y nombre del informe de la Carrera 'NonStop' [sin extensión] (Predeterminado: <carpeta raíz>/" << NOMBRE_INFORME_NONSTOP_DEFAULT << "): ";
-    cin.getline(rutaInformeNonStop, nonStopSize);
-    setIfEmpty(rutaInformeNonStop, NOMBRE_INFORME_NONSTOP_DEFAULT);
-    strcat(rutaInformeNonStop, ".bin");
-
-    cout << "Ruta resultante: " << rutaInformeNonStop << endl << endl;
+    return 0;
 }
 
 void sobreescribirLlegada(FILE* f, RegCorredores& reg) {
