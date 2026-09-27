@@ -1,8 +1,8 @@
 #include <iostream>
 #include <cstring>
 
-#define CANTIDAD_CORREDORES 1000
-
+#define CANTIDAD_CORREDORES_TOTAL 2000
+#define CANTIDAD_CORREDORES_CARRERA 1000
 #define LARGO_CAMPO_POSICIONES 16
 #define LARGO_CAMPO_ID 6
 #define LARGO_CAMPO_GENERO 10
@@ -85,8 +85,8 @@ int tiempoADecimas(const char[]);
 
 
 int main() {
-    RegCorredores corredores[CANTIDAD_CORREDORES] = {};
-    RegCorredores clasica[CANTIDAD_CORREDORES], nonstop[CANTIDAD_CORREDORES];
+    RegCorredores corredores[CANTIDAD_CORREDORES_TOTAL] = {};
+    RegCorredores clasica[CANTIDAD_CORREDORES_CARRERA], nonstop[CANTIDAD_CORREDORES_CARRERA];
     RegCorredores reg;
 
     char carpetaRuta[200] = "./";
@@ -102,7 +102,7 @@ int main() {
     fclose(fCorredores);
 
     int nC = 0, nN = 0;
-    for (int i = 0; i < CANTIDAD_CORREDORES; i++) {
+    for (int i = 0; i < CANTIDAD_CORREDORES_TOTAL; i++) {
         if (corredores[i].numero == 0) break;
         
         if (strstr(corredores[i].categoria, "Clasica") != NULL)
