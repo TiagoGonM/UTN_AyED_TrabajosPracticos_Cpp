@@ -189,12 +189,8 @@ void ordenar(RegCorredores v[], int n) {
 
 void generarInforme(FILE* file, RegCorredores v[], int n) {
     HeadersInforme headers;
-    
     establecerLargoHeaders(headers);
-    
-    // fwrite(id, sizeof(id - 1), 1, file);
-    // fwrite(nombreApellido, sizeof(nombreApellido - 1), 1, file);
-    // fwrite(total, sizeof(total - 1), 1, file);
+    fwrite(&headers, sizeof(HeadersInforme), 1, file);
     
     cout << headers.posGral 
          << headers.posGenero 
@@ -273,10 +269,8 @@ void generarInforme(FILE* file, RegCorredores v[], int n) {
              << reg.difPrimero 
              << reg.difAnterior
              << endl;
-            
-        // fwrite(id, sizeof(id), 1, file);
-        // fwrite(nombre, sizeof(nombre), 1, file);
-        // fwrite(total, sizeof(total), 1, file);
+        
+        fwrite(&reg, sizeof(RegInforme), 1, file);    
     }
 }
 
