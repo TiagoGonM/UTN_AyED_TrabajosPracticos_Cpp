@@ -348,6 +348,7 @@ int obtenerCantidadCategorias(RegCorredores corredores[], int cantidadCorredores
         for (int j = 0; j < cantidadCategorias; j++) {
             if (strcmp(corredores[i].categoria,categoriasVistas[j]) == 0) { categoriaYaExiste = true; break; }
         }
+        
         if (categoriaYaExiste == false) {
             strcpy(categoriasVistas[cantidadCategorias],corredores[i].categoria);
             cantidadCategorias++;
@@ -363,8 +364,8 @@ void obtenerCategorias(RegCorredores corredores[], int cantidadCorredores, char 
         for (int j = 0; j < cantidadGuardadas; j++) {
             if (strcmp(corredores[i].categoria, categorias[j]) == 0) { categoriaYaExiste = true; break;}
         }
-        if (categoriaYaExiste == 0) {
 
+        if (!categoriaYaExiste && !strstr(corredores[i].categoria, "No Termino")) {
             strcpy(categorias[cantidadGuardadas], corredores[i].categoria);
             cantidadGuardadas++;
         }
@@ -390,7 +391,6 @@ void obtenerPodioCategoria(RegCorredores corredores[], int cantidadCorredores, c
     int cantidadPodio = 0;
     for (int i = 0; i < 3; i++) {podio[i].numero = -1;} //-1 si no se llenó el podio
     for (int i = 0; i < cantidadCorredores && cantidadPodio < 3; i++) {
-
         if (strcmp(corredores[i].categoria,categoria) == 0) {
             if (tiempoADecimas(corredores[i].llegada) != -1) {
                 podio[cantidadPodio] = corredores[i];
