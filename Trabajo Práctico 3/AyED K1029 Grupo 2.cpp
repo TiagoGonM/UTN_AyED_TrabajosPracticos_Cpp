@@ -1,12 +1,20 @@
 /*
 Funciones próximas a implementar:
-1. importación del archivo.bin con las materias y sus respectivas correlativas
 2. Diseño y desarrollo de una consola interactiva para poder obtener información sobre una materia específica
 */
 
 #include <iostream>
-
+#include <cstring>
+#include <cstdio>
 using namespace std;
+
+struct RegistroArchivo{
+    int codigo;
+    char nombre[50];
+    char correlatividad[50];
+    char cursadaRequerida[3];
+    char finalRequerido[3];
+};
 
 struct NodoCorrelativa {
     int codMateria;
@@ -18,10 +26,132 @@ struct NodoCorrelativa {
 struct Materia {
     int codigo;
     char nombre[50];
-    NodoCorrelativa* correlativa;
+    NodoCorrelativa* correlativas;
     Materia* sig;
 };
 
-int main() {
+// --- FUNCIONES AUXILIARES DE LISTAS ---
 
+// Busca una materia en la lista principal. Si no existe, la crea y la inserta al final.
+Materia* buscarOInsertarMateria(Materia* &lista, int codigo, const char* nombre) {
+    Materia* aux = lista;
+    Materia* ant = NULL;
+    while (aux != NULL && aux->codigo != codigo) {
+        ant = aux;
+        aux = aux->sig;
+    }
+    if (aux != NULL) {
+        return aux; 
+    }
+    
+    Materia* nuevo = new Materia();
+    nuevo->codigo = codigo;
+    strcpy(nuevo->nombre, nombre);
+    nuevo->correlativas = NULL;
+    nuevo->sig = NULL;
+    
+    if (ant == NULL) {
+        lista = nuevo;
+    } else {
+        ant->sig = nuevo;
+    }
+    return nuevo;
+}
+
+// Busca el código de una materia dado su nombre (necesario porque el archivo guarda el nombre de la correlativa)
+int buscarCodigoPorNombre(Materia* lista, const char* nombre) {
+    Materia* aux = lista;
+    while (aux != NULL) {
+        if (strcmp(aux->nombre, nombre) == 0) {
+            return aux->codigo;
+        }
+        aux = aux->sig;
+    }
+    return -1;
+}
+
+// Inserta un nuevo nodo en la sublista de correlativas
+void insertarCorrelativa(NodoCorrelativa* &listaCorrelativas, int codCorrelativa, bool reqCursada, bool reqFinal) {
+    NodoCorrelativa* nuevo = new NodoCorrelativa();
+    nuevo->codMateria = codCorrelativa;
+    nuevo->cursadaAprobada = reqCursada;
+    nuevo->finalAprobado = reqFinal;
+    nuevo->sig = NULL;
+    
+    // Inserción al final de la sublista
+    if (listaCorrelativas == NULL) {
+        listaCorrelativas = nuevo;
+    } else {
+        NodoCorrelativa* aux = listaCorrelativas;
+        while (aux->sig != NULL) {
+            aux = aux->sig;
+        }
+        aux->sig = nuevo;
+    }
+}
+
+Materia* importarMaterias(const char* nombreArchivo){
+    Materia* listaMaterias = NULL;
+    FILE* f = fopen(nombreArchivo, "rb");
+    if (!f){
+        cout << "Error al abrir el archivo." << nombreArchivo << endl;
+        return NULL;
+    }
+
+    RegistroArchivo reg;
+
+    fread(&reg, sizeof(RegistroArchivo), 1, f);
+    while (!feof(f)){
+        Materia* matActual = buscarOInsertarMateria(listaMaterias, reg.codigo, reg.nombre);
+        if (strcmp(reg.correlatividad, "Ninguna") != 0){
+            int codCorrelativa = buscarCodigoPorNombre(listaMaterias, reg.correlatividad);
+            bool reqCursada = (strcmp(reg.cursadaRequerida, "Si") == 0);
+            bool reqFinal = (strcmp(reg.finalRequerido, "Si") == 0);
+            insertarCorrelativa(matActual->correlativas, codCorrelativa, reqCursada, reqFinal);
+        }
+        fread(&reg, sizeof(RegistroArchivo), 1, f);
+    }
+    fclose(f);
+    return listaMaterias;
+}
+
+// Función auxiliar para verificar visualmente que las listas se enlazaron bien
+void mostrarMaterias(Materia* lista) {
+    Materia* aux = lista;
+
+    while (aux != NULL) {
+        cout << "[" << aux->codigo << "] " << aux->nombre << endl;
+        
+        NodoCorrelativa* corr = aux->correlativas;
+        if (corr == NULL) {
+            cout << "  -> Sin correlativas requeridas." << endl;
+        } else {
+            // Recorremos la sublista (Correlativas de esta materia)
+            while (corr != NULL) {
+                cout << "  -> Correlativa requerida (Codigo " << corr->codMateria << "): "
+                     << "Cursada=" << (corr->cursadaAprobada ? "SI" : "NO") 
+                     << " | Final=" << (corr->finalAprobado ? "SI" : "NO") << endl;
+                corr = corr->sig;
+            }
+        }
+        cout << "------------------------------------------------" << endl;
+        aux = aux->sig;
+    }
+}
+
+int main() {
+    Materia* planDeEstudios = importarMaterias("materia_correlativas.bin");
+    if (planDeEstudios == NULL) {
+        cout << "Error: No se pudo cargar el plan de estudios. Revisa el archivo .bin" << endl;
+        return 1; 
+    }
+    cout << "=== PLAN DE ESTUDIOS CARGADO EXITOSAMENTE ===" << endl;
+    mostrarMaterias(planDeEstudios);
+
+    // NOTA: Aca hay que llamar a la función de limpieza de memoria (los delete) antes de cerrar el programa.
+
+    cout << "\nPresione ENTER para salir...";
+    cin.ignore(); 
+    cin.get();    
+    return 0;
 }
