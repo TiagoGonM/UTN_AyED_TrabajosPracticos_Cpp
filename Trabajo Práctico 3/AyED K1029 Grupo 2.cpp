@@ -1,8 +1,3 @@
-/*
-Funciones próximas a implementar:
-2. Diseño y desarrollo de una consola interactiva para poder obtener información sobre una materia específica
-*/
-
 #include <iostream>
 #include <cstring>
 
