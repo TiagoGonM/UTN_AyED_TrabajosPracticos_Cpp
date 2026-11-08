@@ -159,26 +159,33 @@ Materia* mostrarMenu(Materia* lista) {
     return buscarOInsertarMateria(lista, opt);
 }
 
-void mostrarCorrelativasPorMateria(Materia* materia, Materia* listaMaterias) {
+void mostrarCorrelativasPorMateria(Materia* materia, Materia* listaMaterias, bool mostarTitulo = true, int largoIndentado = 0) {
     NodoCorrelativa* correlativas = materia->correlativas;
-    
-    
+
     NodoCorrelativa* nodoActual = correlativas;
-    cout << "\n\n";
     if (!nodoActual) {
         cout << "La materia " << materia->nombre << " no tiene correlativas." << endl;
         return;
     }
     
-    cout << "Correlativas para la materia " << materia->nombre << ":\n";
+    if (mostarTitulo) cout << "Correlativas para la materia " << materia->nombre << ":\n";
 
     while (nodoActual) {
         Materia* materiaRelacionada = buscarOInsertarMateria(listaMaterias, nodoActual->codMateria);
-        
-        cout << "- " << materiaRelacionada->nombre << " (Código " << materiaRelacionada->codigo << "): ";
+        for (int i = 0; i < largoIndentado; i++) {
+            cout << "\t";
+        }
+
+        if (!largoIndentado && materiaRelacionada->correlativas) cout << endl; // Separación por correlativa de la correlativa principal
+        cout << (materiaRelacionada->correlativas ? "+ " : "- ") << materiaRelacionada->nombre << " (Código " << materiaRelacionada->codigo << "): ";
         cout << "Cursada requerida: " << (nodoActual->cursadaAprobada ? "Si" : "No");
         cout << " | Final requerido: " << (nodoActual->finalAprobado ? "Si" : "No") << endl;
         nodoActual = nodoActual->sig;
+
+        if (materiaRelacionada->correlativas) {
+            mostrarCorrelativasPorMateria(materiaRelacionada, listaMaterias, false, ++largoIndentado);
+            largoIndentado--;
+        }
     }
 }
 
@@ -214,6 +221,7 @@ int main() {
     cout << "=== PLAN DE ESTUDIOS CARGADO EXITOSAMENTE ==="<< endl;
     do {
         Materia* materiaSeleccionada = mostrarMenu(planDeEstudios);
+        cout << endl;
         mostrarCorrelativasPorMateria(materiaSeleccionada, planDeEstudios);
         
         cout << "\n¿Quiere revisar otra materia (S/n)? ";
