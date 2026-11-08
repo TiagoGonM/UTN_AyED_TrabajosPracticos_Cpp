@@ -15,14 +15,14 @@ struct NodoCorrelativa {
     int codMateria;
     bool cursadaAprobada;
     bool finalAprobado;
-    NodoCorrelativa* sig;
+    NodoCorrelativa* sig = NULL;
 };
 
 struct Materia {
     int codigo;
     char nombre[50];
-    NodoCorrelativa* correlativas;
-    Materia* sig;
+    NodoCorrelativa* correlativas = NULL;
+    Materia* sig = NULL;
 };
 
 // --- FUNCIONES AUXILIARES DE LISTAS ---
@@ -159,42 +159,50 @@ Materia* mostrarMenu(Materia* lista) {
     return buscarOInsertarMateria(lista, opt);
 }
 
-void mostrarCorrelativasPorMateria(Materia* materia, Materia* listaMaterias) {
+void mostrarCorrelativasPorMateria(Materia* materia, Materia* listaMaterias, bool mostarTitulo = true, int largoIndentado = 0) {
     NodoCorrelativa* correlativas = materia->correlativas;
-    
-    
+
     NodoCorrelativa* nodoActual = correlativas;
-    cout << "\n\n";
     if (!nodoActual) {
         cout << "La materia " << materia->nombre << " no tiene correlativas." << endl;
         return;
     }
     
-    cout << "Correlativas para la materia " << materia->nombre << ":\n";
+    if (mostarTitulo) cout << "Correlativas para la materia " << materia->nombre << ":\n";
 
     while (nodoActual) {
         Materia* materiaRelacionada = buscarOInsertarMateria(listaMaterias, nodoActual->codMateria);
-        
-        cout << "- " << materiaRelacionada->nombre << " (Código " << materiaRelacionada->codigo << "): ";
+        for (int i = 0; i < largoIndentado; i++) {
+            cout << "\t";
+        }
+
+        if (!largoIndentado && materiaRelacionada->correlativas) cout << endl; // Separación por correlativa de la correlativa principal
+        cout << (materiaRelacionada->correlativas ? "+ " : "- ") << materiaRelacionada->nombre << " (Código " << materiaRelacionada->codigo << "): ";
         cout << "Cursada requerida: " << (nodoActual->cursadaAprobada ? "Si" : "No");
         cout << " | Final requerido: " << (nodoActual->finalAprobado ? "Si" : "No") << endl;
         nodoActual = nodoActual->sig;
+
+        if (materiaRelacionada->correlativas) {
+            mostrarCorrelativasPorMateria(materiaRelacionada, listaMaterias, false, ++largoIndentado);
+            largoIndentado--;
+        }
     }
 }
 
 void liberarMemoriaDeCorrelativas(NodoCorrelativa*& listaC) {
-    while (listaC != NULL) {
+    while (listaC) {
         NodoCorrelativa* aux = listaC;
         listaC = listaC->sig;
+
         delete aux;
     }
 }
 
 void liberarMemoriaMaterias(Materia*& lista) {
-    while (lista != NULL) {
+    while (lista) {
         Materia* aux = lista;
         lista = lista->sig;
-
+        
         liberarMemoriaDeCorrelativas(aux->correlativas);
 
         delete aux;
@@ -211,9 +219,9 @@ int main() {
     }
 
     cout << "=== PLAN DE ESTUDIOS CARGADO EXITOSAMENTE ==="<< endl;
-    mostrarMaterias(planDeEstudios);
     do {
         Materia* materiaSeleccionada = mostrarMenu(planDeEstudios);
+        cout << endl;
         mostrarCorrelativasPorMateria(materiaSeleccionada, planDeEstudios);
         
         cout << "\n¿Quiere revisar otra materia (S/n)? ";
@@ -222,7 +230,6 @@ int main() {
 
     // Liberar la memoria del plan de estudios antes de cerrar el programa.
     liberarMemoriaMaterias(planDeEstudios);
-    liberarMemoriaDeCorrelativas(planDeEstudios->correlativas);
 
     cout << "\nPresione cualquier tecla para salir...";
     cin.ignore(); 
