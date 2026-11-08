@@ -144,9 +144,9 @@ Materia* mostrarMenu(Materia* lista) {
     int opt = 0;
     
     Materia* nodoActual = lista;
-    cout << "\n== Menú ==\n";
+    cout << "\n== Menu ==\n";
     while (nodoActual) {
-        cout << "[" << nodoActual->codigo << "] " << nodoActual->nombre << " - Código " << nodoActual->codigo << endl;
+        cout << "[" << nodoActual->codigo << "] " << nodoActual->nombre << " - Codigo " << nodoActual->codigo << endl;
         nodoActual = nodoActual->sig;
 
         id++;
@@ -155,8 +155,8 @@ Materia* mostrarMenu(Materia* lista) {
     cout << "Seleccione una materia [1-" << id - 1 << "]: ";
     cin >> opt;
     
-    while (opt <= 0 || opt > id) {
-        cout << "Opción inválida." << endl;
+    while (opt <= 0 || opt >= id) {
+        cout << "Opcion invalida." << endl;
         cout << endl << "Seleccione una materia [1-" << id - 1 << "]: ";
         cin >> opt;
     }
@@ -187,6 +187,25 @@ void mostrarCorrelativasPorMateria(Materia* materia, Materia* listaMaterias) {
     }
 }
 
+void liberarMemoriaDeCorrelativas(NodoCorrelativa*& listaC) {
+    while (listaC != NULL) {
+        NodoCorrelativa* aux = listaC;
+        listaC = listaC->sig;
+        delete aux;
+    }
+}
+
+void liberarMemoriaMaterias(Materia*& lista) {
+    while (lista != NULL) {
+        Materia* aux = lista;
+        lista = lista->sig;
+
+        liberarMemoriaDeCorrelativas(aux->correlativas);
+
+        delete aux;
+    }
+}
+
 int main() {
     char exit[5] = "";
 
@@ -206,8 +225,10 @@ int main() {
         cin >> exit;
     } while (exit[0] == 's' || exit[0] == 'S');
 
-    // NOTA: Aca hay que llamar a la función de limpieza de memoria (los delete) antes de cerrar el programa.
-    
+    // Liberar la memoria del plan de estudios antes de cerrar el programa.
+    liberarMemoriaMaterias(planDeEstudios);
+    liberarMemoriaDeCorrelativas(planDeEstudios->correlativas);
+
     cout << "\nPresione cualquier tecla para salir...";
     cin.ignore(); 
     cin.get();    

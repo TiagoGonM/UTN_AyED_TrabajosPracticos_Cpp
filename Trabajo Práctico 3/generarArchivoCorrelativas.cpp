@@ -53,7 +53,12 @@ Materia dequeue(Nodo*& lista) {
 void cargarArchivo(Nodo* lista) {
     FILE* f = fopen("materia_correlativas.bin", "wb");
     
-    while (lista->sig) {
+    if (lista == NULL) {
+        cout << "Error al crear el archivo." << endl;
+        return;
+    }
+
+    while (lista != NULL) {
         Materia materia = dequeue(lista);
         fwrite(&materia, sizeof(Materia), 1, f);
         cout << "Escribiendo " << materia.nombre << endl;
