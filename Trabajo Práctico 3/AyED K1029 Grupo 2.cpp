@@ -15,14 +15,14 @@ struct NodoCorrelativa {
     int codMateria;
     bool cursadaAprobada;
     bool finalAprobado;
-    NodoCorrelativa* sig;
+    NodoCorrelativa* sig = NULL;
 };
 
 struct Materia {
     int codigo;
     char nombre[50];
-    NodoCorrelativa* correlativas;
-    Materia* sig;
+    NodoCorrelativa* correlativas = NULL;
+    Materia* sig = NULL;
 };
 
 // --- FUNCIONES AUXILIARES DE LISTAS ---
@@ -183,18 +183,19 @@ void mostrarCorrelativasPorMateria(Materia* materia, Materia* listaMaterias) {
 }
 
 void liberarMemoriaDeCorrelativas(NodoCorrelativa*& listaC) {
-    while (listaC != NULL) {
+    while (listaC) {
         NodoCorrelativa* aux = listaC;
         listaC = listaC->sig;
+
         delete aux;
     }
 }
 
 void liberarMemoriaMaterias(Materia*& lista) {
-    while (lista != NULL) {
+    while (lista) {
         Materia* aux = lista;
         lista = lista->sig;
-
+        
         liberarMemoriaDeCorrelativas(aux->correlativas);
 
         delete aux;
@@ -211,7 +212,6 @@ int main() {
     }
 
     cout << "=== PLAN DE ESTUDIOS CARGADO EXITOSAMENTE ==="<< endl;
-    mostrarMaterias(planDeEstudios);
     do {
         Materia* materiaSeleccionada = mostrarMenu(planDeEstudios);
         mostrarCorrelativasPorMateria(materiaSeleccionada, planDeEstudios);
@@ -222,7 +222,6 @@ int main() {
 
     // Liberar la memoria del plan de estudios antes de cerrar el programa.
     liberarMemoriaMaterias(planDeEstudios);
-    liberarMemoriaDeCorrelativas(planDeEstudios->correlativas);
 
     cout << "\nPresione cualquier tecla para salir...";
     cin.ignore(); 
